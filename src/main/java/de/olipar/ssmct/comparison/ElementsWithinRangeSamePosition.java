@@ -20,7 +20,7 @@ public class ElementsWithinRangeSamePosition implements Comparator<Comparable<? 
 	public int compare(Comparable<? extends Number>[] o1, Comparable<? extends Number>[] o2) {
 		int ret = 0;
 		for (int i = 0; i < Math.min(o1.length, o2.length); i++) {
-			if (Math.abs((byte) o1[i] - (byte) o2[i]) <= delta)
+			if (Math.abs((double) o1[i] - (double) o2[i]) <= delta)
 				ret++;
 		}
 		return ret;
