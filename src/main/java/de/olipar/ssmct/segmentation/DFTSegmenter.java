@@ -29,15 +29,15 @@ public class DFTSegmenter implements Segmenter {
 	public Comparable[][] getSegments(byte[] input) {
 		Double[][] segments;
 		byte[] currentSamples;
+		float overlap=.1f;
 		switch (segmentType) {
 		case FREQENCY_LIST:
-			segments = new Double[(int) Math.ceil(sampleRate * 1.0 / numberOfSamples)][(int) numberOfSamples / 2];
+			segments = new Double[(int) Math.ceil(input.length * (1/overlap) / numberOfSamples)][(int) numberOfSamples / 2];
 			for (int i = 0; i < segments.length; i++) {
-				if (input.length < (i + 1) * numberOfSamples)
-					currentSamples = Arrays.copyOfRange(input, i * numberOfSamples, (i + 1) * numberOfSamples);
-				else
-					currentSamples = Arrays.copyOfRange(input, i * numberOfSamples, input.length);
-				segments[i]=abs(dft(currentSamples));
+
+				currentSamples = Arrays.copyOfRange(input, (int) (i * overlap * numberOfSamples),
+						(int) ((i * overlap + 1) * numberOfSamples));
+				segments[i] = abs(dft(currentSamples));
 			}
 			return segments;
 
@@ -52,11 +52,12 @@ public class DFTSegmenter implements Segmenter {
 		int N = input.length;
 		Complex[] ret = new Complex[(int) Math.floor(N / 2)];
 		Complex sum;
+		Complex exponent;
 		for (int n = 0; n < (int) Math.floor(N / 2); n++) {
 			sum = Complex.ZERO;
 			for (int k = 0; k < N; k++) {
-				Complex exponent = Complex.I.multiply(-2 * Math.PI * n * k / N);
-				sum.add(exponent.exp());
+				exponent = Complex.I.multiply(-2.0D * Math.PI * n * k / N);
+				sum = sum.add(exponent.exp().multiply((input[k] - 127) / 127.0D));
 			}
 			ret[n] = sum;
 		}
@@ -67,7 +68,7 @@ public class DFTSegmenter implements Segmenter {
 	private Double[] abs(Complex[] input) {
 		Double[] ret = new Double[input.length];
 		for (int i = 0; i < input.length; i++) {
-			ret[i] = input[i].abs();
+			ret[i] = Math.log10(input[i].abs() * 2.0D)*20.0;
 		}
 		return ret;
 	}
